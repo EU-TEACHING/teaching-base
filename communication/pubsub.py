@@ -26,8 +26,11 @@ class RabbitMQProducer(RabbitMQHandler):
         for t in topics:            
             self._channel.exchange_declare(exchange=f'{t}.exchange', exchange_type='fanout', passive=True) 
 
-    def publish(self, body, topic):
-        self._channel.basic_publish(exchange=f'{topic}.exchange', routing_key='', body=body)
+    def publish(self, input_fn):
+        while True:
+            body, topic = next(input_fn)
+            self._channel.basic_publish(exchange=f'{topic}.exchange', routing_key='', body=body)
+            yield True
 
 
 class RabbitMQConsumer(RabbitMQHandler):
