@@ -1,2 +1,2 @@
 # base
-Project for the base image(s) and classes.
+Project for the base image(s), classes and communication.
