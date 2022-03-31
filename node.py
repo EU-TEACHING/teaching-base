@@ -7,14 +7,14 @@ from .communication.pubsub import RabbitMQProducer, RabbitMQConsumer
 
 class TEACHINGNode:
 
-    def __init__(self, service_logic_fn, consume, produce):
+    def __init__(self, service_logic_fn, produce, consume):
         self._id = None
         self._mqparams = None
 
-        self._produce = True
+        self._produce = produce
         self._producer = None
 
-        self._consume = True
+        self._consume = consume
         self._consumer = None
 
         self._logic_fn = service_logic_fn
