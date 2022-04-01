@@ -1,27 +1,16 @@
-from ctypes import FormatError
-import json
-import time
+from dataclasses import dataclass, field
+from dataclasses_json import dataclass_json
 
+import datetime
+import os
+from typing import Dict
+
+@dataclass_json
+@dataclass
 class DataPacket:
 
-    def __init__(self, name=None, value=None, data_type=None, timestamp=None):
-        self.name = name
-        self.value = value
-        self.timestamp = time.time() if timestamp is None else timestamp
-        self.data_type = data_type
-
-    @staticmethod
-    def from_string(self, bytes):
-        data = json.loads(bytes)
-        if self.__dict__.keys() != data.keys():
-            raise FormatError('Wrong data format on packet')
-        self.name = data['name']
-        self.value = data['value']
-        self.timestamp = data['timestamp']
-        self.data_type = data['data_type']
-
-    def __str__(self):
-        return str(self.__dict__)
-
-    def dumps(self):        
-        return json.dumps(self.__dict__)
+    service_type: str = field(default_factory=os.environ('SERVICE_TYPE'))
+    service_name: str = field(default_factory=os.environ('SERVICE_NAME'))
+    topic: str = ''
+    timestamp: datetime.datetime = field(default_factory=datetime.now())
+    body: Dict = {}
