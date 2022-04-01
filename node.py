@@ -15,7 +15,7 @@ class TEACHINGNode(object):
         self._consume = consume
         self._consumer = None
 
-        self._built = self._build()
+        self._build()
     
 
     def _build(self):
