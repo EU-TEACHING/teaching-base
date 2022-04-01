@@ -1,13 +1,11 @@
 import os
-from functools import reduce
-from typing import List
 
 from .communication.pubsub import RabbitMQProducer, RabbitMQConsumer
 
 
-class TEACHINGNode:
+class TEACHINGNode(object):
 
-    def __init__(self, service_logic_fn, produce, consume):
+    def __init__(self, produce, consume):
         self._id = None
         self._mqparams = None
 
@@ -17,12 +15,11 @@ class TEACHINGNode:
         self._consume = consume
         self._consumer = None
 
-        self._logic_fn = service_logic_fn
-
-        self._built = False
+        self._built = self._build()
     
 
-    def build(self):
+    def _build(self):
+        print("Building the TEACHING Node...")
 
         SERVICE_NAME = os.getenv('SERVICE_NAME')
         self._id = SERVICE_NAME
@@ -64,26 +61,33 @@ class TEACHINGNode:
             else:
                 raise KeyError(f"Environment variable INPUT_TOPIC is missing for consumer {SERVICE_NAME}.")
             self._consumer = RabbitMQConsumer(self._mq_params, INPUT_TOPIC)
+        
+        print("Done!")
 
 
-    def start(self):
-        if not self._built:
-            self.build()
+    def __call__(self, service_fn):
+
+        if self._consume and not self._produce:
+            def consumer_service():
+                for msg in self._consumer.consume():
+                    service_fn(msg)
+            
+            return consumer_service
+
+
+        if not self._consume and self._produce:
+            def producer_service():
+                for msg in service_fn():
+                    self._producer.publish(msg)
+
+            return producer_service
         
-        if len(self._logic_fn) > 1:
-            def compose(*funcs):
-                return lambda x: reduce(lambda f, g: g(f), list(funcs), x)
-                
-            self._logic_fn == compose(self._logic_fn)
-        else:
-            self._logic_fn = self._logic_fn[0]
-        
-        if self._consume:
-            generator_loop = self._logic_fn(self._consumer.consume())
-            if self._produce:
-                generator_loop = self._producer(generator_loop)
-        else:
-            generator_loop = self._producer(self._logic_fn())
-        
-        while True:
-            next(generator_loop)
+
+        if self._consume and self._produce:
+            def producer_consumer_service():
+                for msg in self._consumer.consume():
+                    to_publish = service_fn(msg)
+                    if to_publish is not None:
+                        self._producer.publish(to_publish)
+            
+            return producer_consumer_service

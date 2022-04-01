@@ -1,7 +1,8 @@
 import os
 import pika
-
 from queue import Queue
+
+from .packet import DataPacket
 
 class RabbitMQHandler:
 
@@ -26,11 +27,8 @@ class RabbitMQProducer(RabbitMQHandler):
         for t in topics:            
             self._channel.exchange_declare(exchange=f'{t}.exchange', exchange_type='fanout', passive=True) 
 
-    def publish(self, input_fn):
-        while True:
-            body, topic = next(input_fn)
-            self._channel.basic_publish(exchange=f'{topic}.exchange', routing_key='', body=body)
-            yield True
+    def publish(self, msg):
+        self._channel.basic_publish(exchange=f'{msg.topic}.exchange', routing_key='', body=msg.to_json())
 
 
 class RabbitMQConsumer(RabbitMQHandler):
@@ -47,7 +45,7 @@ class RabbitMQConsumer(RabbitMQHandler):
     def consume(self):
         self.channel.basic_consume(
             self._queue, 
-            callback=lambda ch, method, properties, body: self._data.put(body),
+            callback=lambda ch, method, properties, body: self._data.put(DataPacket.schema().loads(body)),
             auto_ack=True
         )
         self.channel.start_consuming()
