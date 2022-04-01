@@ -6,7 +6,7 @@ from .packet import DataPacket
 
 class RabbitMQHandler:
 
-    def __init__(self, params):
+    def __init__(self, params, topics):
         self._config = pika.ConnectionParameters(
             host=params['host'], 
             port=params['port'],
@@ -18,14 +18,12 @@ class RabbitMQHandler:
         )
         self._connection = pika.BlockingConnection(self._config) 
         self._channel = self._connection.channel()
+        self.topics = topics
+        for t in topics:            
+            self._channel.exchange_declare(exchange=f'{t}.exchange', exchange_type='fanout', passive=True) 
 
 
 class RabbitMQProducer(RabbitMQHandler):
-    def __init__(self, params, topics):
-        super(self, RabbitMQHandler).__init__(params)
-        self._topics = topics
-        for t in topics:            
-            self._channel.exchange_declare(exchange=f'{t}.exchange', exchange_type='fanout', passive=True) 
 
     def publish(self, msg):
         self._channel.basic_publish(exchange=f'{msg.topic}.exchange', routing_key='', body=msg.to_json())
@@ -35,7 +33,7 @@ class RabbitMQConsumer(RabbitMQHandler):
 
     def __init__(self, params, topics):
         super(self, RabbitMQHandler).__init__(params)
-        self._queue = f"{os.getenv('SERVICE_NAME')}.queue"
+        self._queue = f"{os.environ['SERVICE_NAME']}.queue"
         self.channel.queue_declare(queue=self._queue, exclusive=True, passive=True)
         for t in topics: 
             self.channel.queue_bind(exchange=f'{t}.exchange', queue=self._queue)
