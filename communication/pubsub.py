@@ -1,4 +1,5 @@
 import os
+from typing import Iterator
 import pika
 from queue import Queue
 
@@ -20,13 +21,22 @@ class RabbitMQHandler:
         self._channel = self._connection.channel()
         self.topics = topics
         for t in topics:            
-            self._channel.exchange_declare(exchange=f'{t}.exchange', exchange_type='fanout', passive=True) 
+            self._channel.exchange_declare(
+                exchange=f'{t}.exchange', 
+                exchange_type='fanout', 
+                passive=True
+            ) 
 
 
 class RabbitMQProducer(RabbitMQHandler):
 
-    def publish(self, msg):
-        self._channel.basic_publish(exchange=f'{msg.topic}.exchange', routing_key='', body=msg.to_json())
+    def __call__(self, msg_stream: Iterator[DataPacket]) -> None:
+        for msg in msg_stream:
+            self._channel.basic_publish(
+                exchange=f'{msg.topic}.exchange', 
+                routing_key='', 
+                body=msg.to_json()
+            )
 
 
 class RabbitMQConsumer(RabbitMQHandler):
@@ -40,7 +50,7 @@ class RabbitMQConsumer(RabbitMQHandler):
 
         self._data = Queue()
 
-    def consume(self):
+    def __call__(self):
         self.channel.basic_consume(
             self._queue, 
             callback=lambda ch, method, properties, body: self._data.put(DataPacket.schema().loads(body)),

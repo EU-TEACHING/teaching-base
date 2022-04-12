@@ -42,26 +42,17 @@ class TEACHINGNode(object):
 
 
     def __call__(self, service_fn):
-
-        if self._consume and not self._produce:
-            def consumer_service():
-                for msg in self._consumer.consume():
-                    service_fn(msg)
-            
-            return consumer_service
-
-
-        if not self._consume and self._produce:
-            def producer_service():
-                for msg in service_fn():
-                    self._producer.publish(msg)
-
-            return producer_service
         
+        def service_pipeline():
+            if self._consume and not self._produce:
+                service_fn(self._consumer())
 
-        if self._consume and self._produce:
-            def producer_consumer_service():
-                for msg in service_fn(self._consumer.consume()):
-                    self._producer.publish(msg)
-            
-            return producer_consumer_service
+
+            if not self._consume and self._produce:
+                self._producer(service_fn())
+
+
+            if self._consume and self._produce:
+                self._producer(service_fn(self._consumer()))
+        
+        return service_pipeline
