@@ -40,16 +40,16 @@ class RabbitMQConsumer(RabbitMQHandler):
         self._channel.queue_declare(queue=self._queue, exclusive=True, auto_delete=True)
 
         for t in topics: 
-            self.channel.queue_bind(exchange=f'amq.topic', queue=self._queue, routing_key=t)
+            self._channel.queue_bind(exchange=f'amq.topic', queue=self._queue, routing_key=t)
 
         self._data = Queue()
 
     def __call__(self):
-        self.channel.basic_consume(
+        self._channel.basic_consume(
             self._queue, 
             callback=lambda ch, method, properties, body: self._data.put(DataPacket.schema().loads(body)),
             auto_ack=True
         )
-        self.channel.start_consuming()
+        self._channel.start_consuming()
         while True:
             yield self._data.get()
