@@ -37,7 +37,7 @@ class RabbitMQConsumer(RabbitMQHandler):
     def __init__(self, params, topics):
         super(RabbitMQConsumer, self).__init__(params)
         self._queue = f"{os.environ['SERVICE_NAME']}.queue"
-        self._channel.queue_declare(queue=self._queue, exclusive=True, passive=True)
+        self._channel.queue_declare(queue=self._queue, exclusive=True, auto_delete=True)
 
         for t in topics: 
             self.channel.queue_bind(exchange=f'amq.topic', queue=self._queue, routing_key=t)
