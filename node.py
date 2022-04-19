@@ -41,7 +41,7 @@ class TEACHINGNode(object):
 
     def __call__(self, service_fn):
         
-        def service_pipeline():
+        def service_pipeline(self):
             if self._consume and not self._produce:
                 service_fn(self._consumer())
 
