@@ -2,7 +2,6 @@ import os
 
 from .communication.pubsub import RabbitMQProducer, RabbitMQConsumer
 
-################## FINIRE DI SISTEMARE TOPICS
 
 class TEACHINGNode(object):
 

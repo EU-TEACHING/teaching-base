@@ -28,7 +28,7 @@ class RabbitMQProducer(RabbitMQHandler):
             self._channel.basic_publish(
                 exchange='amq.topic', 
                 routing_key=msg.topic, 
-                body=msg.to_json()
+                body=msg.dumps()
             )
 
 
@@ -47,7 +47,7 @@ class RabbitMQConsumer(RabbitMQHandler):
     def __call__(self):
         self._channel.basic_consume(
             self._queue, 
-            on_message_callback=lambda ch, method, properties, body: self._data.put(DataPacket.schema().loads(body)),
+            on_message_callback=lambda ch, method, properties, body: self._data.put(DataPacket.from_json(body)),
             auto_ack=True
         )
         self._channel.start_consuming()
