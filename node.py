@@ -42,15 +42,16 @@ class TEACHINGNode(object):
     def __call__(self, service_fn):
         
         def service_pipeline(*args):
+            obj = args[0]
             if self._consume and not self._produce:
-                service_fn(self._consumer())
+                service_fn(obj, self._consumer())
 
 
             if not self._consume and self._produce:
-                self._producer(service_fn())
+                self._producer(service_fn(obj))
 
 
             if self._consume and self._produce:
-                self._producer(service_fn(self._consumer()))
+                self._producer(service_fn(obj, self._consumer()))
         
         return service_pipeline
