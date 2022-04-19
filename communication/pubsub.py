@@ -47,7 +47,7 @@ class RabbitMQConsumer(RabbitMQHandler):
     def __call__(self):
         self._channel.basic_consume(
             self._queue, 
-            callback=lambda ch, method, properties, body: self._data.put(DataPacket.schema().loads(body)),
+            on_message_callback=lambda ch, method, properties, body: self._data.put(DataPacket.schema().loads(body)),
             auto_ack=True
         )
         self._channel.start_consuming()
