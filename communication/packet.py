@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 
 import datetime
 import os
@@ -26,4 +26,4 @@ class DataPacket:
         )
     
     def dumps(self):
-        return json.dumps(self.asdict())
+        return json.dumps(asdict(self), default=str)

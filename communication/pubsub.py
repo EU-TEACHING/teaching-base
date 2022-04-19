@@ -1,4 +1,5 @@
 import os
+from threading import Thread
 from typing import Iterator
 import pika
 from queue import Queue
@@ -50,6 +51,7 @@ class RabbitMQConsumer(RabbitMQHandler):
             on_message_callback=lambda ch, method, properties, body: self._data.put(DataPacket.from_json(body)),
             auto_ack=True
         )
-        self._channel.start_consuming()
+        consumption = Thread(target=self._channel.start_consuming)
+        consumption.start()
         while True:
             yield self._data.get()
