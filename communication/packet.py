@@ -11,6 +11,6 @@ class DataPacket:
 
     service_type: str = field(default_factory=os.environ['SERVICE_TYPE'])
     service_name: str = field(default_factory=os.environ['SERVICE_NAME'])
-    topic: str = ''
+    topic: str = field(default_factory='')
     timestamp: Union[datetime.datetime, List[datetime.datetime]] = field(default_factory=datetime.datetime.now())
-    body: Dict = {}
+    body: Dict = field(default_factory={})
