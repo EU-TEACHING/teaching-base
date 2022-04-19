@@ -9,8 +9,8 @@ from typing import Dict, List, Union
 @dataclass
 class DataPacket:
 
-    service_type: str = field(default_factory=os.environ('SERVICE_TYPE'))
-    service_name: str = field(default_factory=os.environ('SERVICE_NAME'))
+    service_type: str = field(default_factory=os.environ['SERVICE_TYPE'])
+    service_name: str = field(default_factory=os.environ['SERVICE_NAME'])
     topic: str = ''
     timestamp: Union[datetime.datetime, List[datetime.datetime]] = field(default_factory=datetime.now())
     body: Dict = {}

@@ -32,6 +32,8 @@ class RabbitMQProducer(RabbitMQHandler):
 
     def __call__(self, msg_stream: Iterator[DataPacket]) -> None:
         for msg in msg_stream:
+            if not msg.topic in self.topics:
+                raise NameError(f"Topic {msg.topic} is not in {self.topics}")
             self._channel.basic_publish(
                 exchange=f'{msg.topic}.exchange', 
                 routing_key='', 
