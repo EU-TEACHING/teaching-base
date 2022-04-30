@@ -31,7 +31,7 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/teaching-base:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/teaching-base:arm64
       -
         name: Build and push AMD64
         uses: docker/build-push-action@v2
@@ -41,5 +41,4 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/teaching-base:latest
-            
+            ${{ secrets.DOCKERHUB_USERNAME }}/teaching-base:amd64            
