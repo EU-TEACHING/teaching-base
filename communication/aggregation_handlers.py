@@ -41,7 +41,7 @@ class KafkaAggregationHandler:
 
 class KafkaAggregationProducer(KafkaAggregationHandler):
     def __call__(self, model_data: DataPacket) -> None:
-        self.producer.produce(model_data.topic, value=model_data.body)
+        self.producer.produce(model_data.topic, value=model_data.dumps())
         self.producer.flush()
 
 
@@ -66,7 +66,7 @@ class KafkaAggregationConsumer(KafkaAggregationHandler):
                     elif msg.error():
                         raise KafkaException(msg.error())
                 else:
-                    yield msg.value()
+                    yield DataPacket.from_json(msg.value())
 
         finally:
             # Close down consumer to commit final offsets.
