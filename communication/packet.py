@@ -28,7 +28,15 @@ class DataPacket:
     @staticmethod
     def from_file(path):
         with open(path, 'r') as f:
-            return json.load(f)
+            ddig = json.load(f)
+            
+        return DataPacket(
+            service_type=ddig['service_type'],
+            service_name=ddig['service_name'],
+            topic=ddig['topic'],
+            timestamp=ddig['timestamp'],
+            body=ddig['body']
+        )
         
     def dumps(self):
         return json.dumps(asdict(self), default=str)
