@@ -25,5 +25,14 @@ class DataPacket:
             body=ddig['body']
         )
     
+    @staticmethod
+    def from_file(path):
+        with open(path, 'r') as f:
+            return json.load(f)
+        
     def dumps(self):
         return json.dumps(asdict(self), default=str)
+    
+    def to_file(self, path):
+        with open(path, 'w') as f:
+            json.dump(asdict(self), f, default=str)
